@@ -1,0 +1,226 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+
+
+
+# <?php
+# namespace App\Http\Controllers;
+# use App\Http\Requests\SignupRequest;
+# use Illuminate\Support\Facades\Auth;
+# use Illuminate\Support\Facades\Hash;
+# use App\Models\User;
+# use App\Models\Country;
+# use Illuminate\Http\Request;
+# use Laravel\Socialite\Facades\Socialite;
+# use Validator;
+ 
+
+# // use App\Models\Album;
+# class UserController extends Controller
+# {
+#         // here i show the  form to create a new user, and return it
+#         public function show()
+#         {
+#             $country = Country::get();
+#             return view('users/signup', compact('country'));
+#         }
+    
+#         // here i validate the fields and  save the data of the new user in the database
+#         public function signup(Request $request)
+#         { 
+#         //  validate the input fields
+#         $validationRules = [
+#             "firstname" => "required|regex:/^[a-zA-Z\s]+$/",
+#             "lastname" => "required|alpha",
+#             "email" => "required|email|unique:users",
+#             "password" => "required|min:8|max:12",
+#             "country" => "required",
+#             "gender" => "required",
+#             "hobbies" => "required",
+#         ];
+#         // here i add a loop on field that it will show error step by step 
+#         $validator = Validator::make($request->all(), $validationRules)->stopOnFirstFailure();
+#         if ($validator->fails()) {
+#             return back()->withErrors($validator->errors())->withInput(); 
+#         }
+#         //concatinate the firstname and lastname before saving them into database   
+#         $fullName = $request->firstname . ' ' . $request->lastname;
+#         //sending data in database 
+#         $user = new User();
+   
+#         $user->name = $fullName;
+#         $user->email = $request->email;
+#         $user->password = bcrypt($request->password);
+#         $user->country_id = $request->country;
+#         $user->gender = $request->gender;
+#         $user->hobbies = json_encode($request->hobbies);
+#         $user->save();
+#         $request->session()->flash('status', 'Your account has been created. Please proceed to login.');
+#         return redirect('/login');
+#         }
+
+
+#         //login functionality
+#         public function login(Request $request)
+#         {
+#         $validator = Validator::make($request->all(),[
+#             'email' => 'required|email',
+#             'password' => 'required',
+#         ]);
+
+#         $loginvalidation = 
+#         [
+#             'email' => 'required|email',
+#             'password' => 'required',
+#         ];
+
+
+#         $validator = Validator::make($request->all(), $loginvalidation)->stopOnFirstFailure();
+#         if ($validator->fails()) {
+#             return back()->withErrors($validator->errors())->withInput(); 
+#         }
+
+#         $credentials = $request->only('email', 'password');
+#         if (Auth::attempt($credentials)) 
+#         {
+#             return redirect('profile'); 
+#         }   
+#         return back()->withErrors(['email' => 'Invalid email or password']);
+#         }
+
+
+#         public function redirectToGoogle()
+#         {
+#             return Socialite::driver('google')->redirect();
+#         }
+    
+        
+#         public function handleGoogleCallback()
+#         {
+#             $googleUser = Socialite::driver('google')->user();
+#             $user = User::where('email', $googleUser->email)->first();
+#             if (!$user) 
+#             {
+#                 session()->flash('message', 'Please sign up to continue');
+#                 return redirect(url('/signup'));
+#             }
+
+#             Auth::login($user);
+#             return redirect(url('/profile'));
+#         }
+    
+#         // here i add logout functionality 
+#         public function logout(Request $request)
+#         {
+#             Auth::logout();
+#             $request->session()->invalidate();
+#             $request->session()->regenerateToken();
+#             return redirect('/'); // Redirect to the home page after logout
+#         }   
+
+#         // here i add the functionality of profile page
+#         public function showProfile()
+#         {
+#         $user = auth()->user();
+#         $nameParts = explode(' ', $user->name); // here i explode the  user data and pass it in view 
+#         $firstName = $nameParts[0];
+#         $lastName = isset($nameParts[1]) ? $nameParts[1] :'';
+#         $userWithCountry = User::join('country', 'users.country_id','=','country.id')// here i join the country and users table for visibility of country at  frontend side.
+#                                 ->where('users.id',$user->id)
+#                                 ->first();
+#         return view('pages.profile', compact('user', 'userWithCountry' , 'firstName', 'lastName'));    
+#         }
+    
+
+        
+#         // adding a profileimage functionality
+#         public function Profile(Request $request)
+#         {
+#             $user = auth()->user();
+            
+#             if ($request->hasFile('profileimage')) 
+#             {
+#                 $filename = time() . "carsafe." . $request->file('profileimage')->getClientOriginalExtension();
+#                 $filePath = $request->file('profileimage')->storeAs('public/profileimages', $filename);
+#                 $user->profileimage = $filename; // Store only the filename in the database
+#                 $user->save();
+               
+#                 return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+#             }
+#             return redirect()->route('profile')->with('error', 'No image uploaded.');
+#         }
+        
+
+
+#         public function editProfile()
+#         {
+#             $user = auth()->user();
+#             $nameParts = explode(' ', $user->name);
+#             $firstName = $nameParts[0];
+#             $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+#             $countries = Country::all(); // Fetch all countries
+#             $userWithCountry = User::join('country', 'users.country_id', '=', 'country.id')
+#                 ->where('users.id', $user->id)
+#                 ->select('users.*', 'country_id')
+#                 ->first(); 
+#             $hobbies = json_decode($user->hobbies); // Decode hobbies from JSON to array
+    
+#             return view('pages/profileedit', compact('user', 'firstName', 'lastName', 'userWithCountry', 'countries', 'hobbies'));
+#         }
+    
+
+#         public function updateProfile(Request $request)
+#         {                   
+#         $user = auth()->user();
+#             $validatedData = $request->validate([
+#                 'firstname' => 'required|string',
+#                 'lastname' => 'required|string',
+#                 'country' => 'required',
+#                 'gender' => 'required',
+#             ]);
+#             $user->name = $request->input('firstname') . ' ' . $request->input('lastname');
+#             $user->gender = $request->input('gender');
+#             $user->country_id = $request->input('country');
+#             if ($request->has('hobbies'))
+#             {
+#                 $user->hobbies = json_encode($request->input('hobbies'));
+#             }
+#             $user->save();
+
+#             return redirect()->route('profile')->with('success', 'Profile updated successfully');
+#         }
+
+#         public function showforgetpassword()
+#         {
+#             return view('users/forgetpassword');
+#         }
+
+        
+# }       
+
+        
+
+       
+
+
+      
