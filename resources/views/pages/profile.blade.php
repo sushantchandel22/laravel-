@@ -5,7 +5,6 @@
 <x-hero-component></x-hero-component>
 
 <div class=" container">
-
     <div class="row row-cols-1 row-cols-md-3 g-4 flex-wrap detail-col">
 
         <div class="col-sm-6 col-md-12 col-lg-5 mb-3 mb-sm-0 detail-row">
@@ -43,6 +42,7 @@
 
             <div class="card-body text-center">
                     <h2 class="text-dark fw-semibold">{{ucfirst($user->name)}}</h2>
+                    
                     <p class="fw-bold fs-5">Email- {{ $user->email }}</p>
                     <a href="{{url('/profile/edit')}}"><button type="button" class="btn btn-primary rounded-0 fs-5">Edit</button></a>
             </div>
@@ -63,7 +63,7 @@
 
                     <div class="col-6 col-sm-4 col-md-6 col-lg-4 fs-5 lh-lg fw-semibold text-dark">Country</div>
                     <div class="col-6 col-sm-4 col-md-6 col-lg-8 fs-5 lh-lg  fw-semibold text-dark">
-                        {{ isset($userWithCountry->country) ? $userWithCountry->country : null }}  
+                        {{ $country }}
                     </div>
                     <div class="col-6 col-sm-4 col-md-6 col-lg-4 fs-5 lh-lg fw-semibold text-dark">Email</div>
                     <div class="col-6 col-sm-4 col-md-6 col-lg-8 fs-5 lh-lg  fw-semibold text-dark">{{ $user->email }}</div>

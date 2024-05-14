@@ -112,9 +112,9 @@
         <div>
             <div class="sidenav">
 
-                <a href="{{ url('/addrole') }}" style="margin-top: 150px">Roles</a>
+                <a href="{{ route('add_role') }}" style="margin-top: 150px">Roles</a>
                 {{-- <a href="#services">Permissions</a> --}}
-                <a href="#clients">View</a>
+                {{-- <a href="#clients">View</a> --}}
                 <a href="{{ url('/admin') }}">Users</a>
             </div>
             <div class="content">

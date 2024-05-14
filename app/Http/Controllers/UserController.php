@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
-
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\ProfileRequest;
 use App\Models\Otps;
 use Illuminate\Support\Str;
 use App\Models\EmailVerification;
@@ -22,97 +23,29 @@ use DB;
 // use App\Models\Album;
 class UserController extends Controller
 {
-    // here i show the  form to create a new user, and return it
-
     public function show()
     {
-        $country = Country::get();
-        return view('users/signup', compact('country'));
-
+        $country['country'] = Country::get();
+        return view('users/signup', $country);
     }
 
-    // here i validate the fields and  save the data of the new user in the database
-    public function signup(Request $request)
+    public function signup(SignupRequest $request)
     {
-        //  validate the input fields
-        try {
-            $validationRules = [
-                "firstname" => "required|regex:/^[a-zA-Z\s]+$/",
-                "lastname" => "required|alpha",
-                "email" => "required|email|unique:users",
-                "password" => "required|min:8|max:12",
-                "country" => "required",
-                "gender" => "required",
-                "hobbies" => "required",
-            ];
-            $validator = Validator::make($request->all(), $validationRules)->stopOnFirstFailure();
-            if ($validator->fails()) {
-                return back()->withErrors($validator->errors())->withInput();
-            }
-            $fullName = $request->firstname . ' ' . $request->lastname;
-            $user = new User();
-            $user->name = $fullName;
-            $user->email = $request->email;
-            $user->password = bcrypt($request->password);
-            $user->country_id = $request->country;
-            $user->gender = $request->gender;
-            $user->hobbies = json_encode($request->hobbies);
-            $user->save();
-            $request->session()->flash('status', 'Your account has been created. Please verify your email.');
-            return redirect('/login');
-        } catch (Exception) {
-            return back()->withErrors($validator->errors())->withInput();
-        }
-    }
-
-    public function verifyemail()
-    {
-        return view('users.addverifyemail');
-    }
-    public function addverifyemail(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-        ]);
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-        $otps = new Otps();
-        $token = str::random(6);
-        $otps->email = $request->email;
-        $otps->token = $token;
-        $otps->save();
-        return redirect('/token')->with('success', 'Check your mail and fill OTP');
-    }
-
-    public function showemailverify()
-    {
-        return view('users.verifyemailtoken');
-    }
-
-    public function ckeckemailtoken(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'token' => 'required'
-        ]);
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-        $otps = Otps::where('email', $request->email)
-            ->where('token', $request->token)
-            ->first();
-
-        if ($otps) {
-            $otps->delete();
-        } else {
-            return back()->withErrors(['message' => 'Invalid token or email'])->withInput();
-        }
-        return redirect('/signup')->with('success', 'Register your account');
+        $fullName = $request->firstname . ' ' . $request->lastname;
+        $user = new User();
+        $user->name = $fullName;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->country_id = $request->country;
+        $user->gender = $request->gender;
+        $user->hobbies = json_encode($request->hobbies);
+        $user->save();
+        $request->session()->flash('status', 'Your account has been created. Please verify your email.');
+        return redirect('/login');
     }
 
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
         $user = User::where('email', $request->email)->first();
         if ($user && $user->is_active) {
@@ -120,13 +53,7 @@ class UserController extends Controller
                 Auth::login($user);
                 return redirect()->route('admin');
             }
-            $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
-                'password' => 'required',
-            ]);
-            if ($validator->fails()) {
-                return back()->withErrors($validator->errors())->withInput();
-            }
+
             $credentials = $request->only('email', 'password');
             if (Auth::attempt($credentials)) {
                 return redirect()->route('profile');
@@ -137,7 +64,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     public function redirectToGoogle()
     {
         session()->forget('type');
@@ -187,7 +114,7 @@ class UserController extends Controller
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
-                return redirect('/');
+                return redirect('/login');
             }
         } else {
             // Redirect to the login page if the user is not logged in
@@ -198,12 +125,15 @@ class UserController extends Controller
     // here i add the functionality of profile page
     public function showProfile()
     {
-        $user = auth()->user();
-        $userWithCountry = User::join('country', 'users.country_id', '=', 'country.id')// here i join the country and users table for visibility of country at  frontend side.
+        $user  = auth()->user();
+        $userWithCountry = User::join('country', 'users.country_id', '=', 'country.id')
             ->select('country.country')
             ->where('users.id', $user->id)
             ->first();
-        return view('pages.profile', compact('user', 'userWithCountry'));
+        return view('pages.profile',[
+            'user' => $user,
+            'country' => $userWithCountry->country,
+        ]);
     }
 
     // adding a profileimage functionality
@@ -213,13 +143,13 @@ class UserController extends Controller
         if ($request->hasFile('profileimage')) {
             $filename = time() . "carsafe." . $request->file('profileimage')->getClientOriginalExtension();
             $filePath = $request->file('profileimage')->storeAs('public/profileimages', $filename);
-            $user->profileimage = $filename; // Store only the filename in the database
+            $user->profileimage = $filename;
             $user->save();
             return redirect()->route('profile')->with('success', 'Profile updated successfully.');
         }
-        // return redirect()->route('profile')->with('error', 'No image uploaded.');
-    }
 
+    }
+    // compact('user', 'userWithCountry', 'countries', 'hobbies')
     public function editProfile()
     {
         $user = auth()->user();
@@ -229,10 +159,15 @@ class UserController extends Controller
             ->select('users.*', 'country_id')
             ->first();
         $hobbies = json_decode($user->hobbies); // Decode hobbies from JSON to array
-        return view('pages/profileedit', compact('user', 'userWithCountry', 'countries', 'hobbies'));
+        return view('pages/profileedit', [
+            'user' => $user,
+            'userWithCountry' => $userWithCountry,
+            'countries' => $countries,
+            'hobbies' => $hobbies
+        ] );
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(ProfileRequest $request)
     {
         $user = auth()->user();
         $user->name = $request->input('firstname') . ' ' . $request->input('lastname');
@@ -253,9 +188,9 @@ class UserController extends Controller
 
     public function searchoption()
     {
-        $country = Country::all();
-        $users = User::with('country')->get();
-        return view('pages.search', compact('users', 'country'));
+        $country ['country'] = Country::all();
+        $users ['user'] = User::with('country')->get();
+        return view('pages.search',$country , $users);
     }
 
 
@@ -281,17 +216,14 @@ class UserController extends Controller
                     }
                 });
             }
-            $data = $query->get();
-            $html = view('pages.partial_view', compact('data'))->render();
+            $data ['data'] = $query->get();
+            $html = view('pages.partial_view', $data)->render();
             return $html;
         }
     }
 
 }
 
-
-
-// php artisan make:controller PostController --resource
 
 
 

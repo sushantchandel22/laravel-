@@ -14,7 +14,7 @@ class GalleryController extends Controller
     {
         $user = auth()->user(); // Get the currently logged-in user
         $galleries = Gallery::where('user_id', $user->id)->get(); // Fetch galleries belonging to the user
-        return view("pages/viewgallery", compact('galleries'));
+        return view("pages/viewgallery",  $galleries);
     }
     // ============++++++++++++++++++++++++++++++++++++++++++++++++++++++++============ //
 
@@ -42,12 +42,6 @@ class GalleryController extends Controller
 
     public function uploadimages(Request $request)
     {
-        $request->validate
-        ([
-                'gallery_id' => 'required',
-                'uploadimage.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
-
         $gallery_id = $request->input('gallery_id');
         foreach ($request->file('uploadimage') as $file) {
             $filename = time() . "_" . $file->getClientOriginalName();
@@ -65,9 +59,10 @@ class GalleryController extends Controller
     {
         $gallery = Gallery::find($gallery_id);
         if (!$gallery) {
-            return response()->json(['error' => 'Gallery not found'], 404);
+            return response('Gallery not found', 404);
         }
         $gallery->delete();
-        return response()->json(['message' => 'Gallery deleted successfully'], 200);
+        return response('Gallery deleted successfully', 200);
     }
+    
 }

@@ -32,6 +32,9 @@
                             id="firstname" aria-describedby="firstnameHelp" name="firstname" placeholder="Your First Name"
                             value="{{ $user->firstname }}">
                     </div>
+                    {{-- @error('firstname')
+                        <p class="text-danger">{{ $message }}</p>
+                    @enderror --}}
                     <div class="mb-3">
                         <label for="country" class="form-label fs-6 fw-semibold">Country</label>
                         <select name="country" class="form-control bg-body-tertiary py-3 ps-3 fs-6"
@@ -73,10 +76,10 @@
                         </div>
                     </div>
                     <!-- <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label fs-6 fw-semibold">Time Zone</label>
-                        <input type="email" class="form-control bg-body-tertiary py-3 ps-3 fs-6" id="exampleInputEmail15"
-                            aria-describedby="emailHelp" placeholder="Your First Name">
-                    </div> -->
+                            <label for="exampleInputEmail1" class="form-label fs-6 fw-semibold">Time Zone</label>
+                            <input type="email" class="form-control bg-body-tertiary py-3 ps-3 fs-6" id="exampleInputEmail15"
+                                aria-describedby="emailHelp" placeholder="Your First Name">
+                        </div> -->
                 </div>
                 <label for="exampleInputEmail1" class="form-label  text-secondary fw-bold fs-6  fw-semibold">Hobbies</label>
                 <div class="  mb-3 form-control d-flex gap-3 bg-body-tertiary py-3 ps-3 fs-6">

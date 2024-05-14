@@ -46,24 +46,6 @@
                     </li>
                 </ul>
                 <div class="button-group d-flex gap-2">
-                    {{-- @if (Auth::check())
-                        <a href="{{ url('/profile') }}" class="link-light link-offset-2 link-underline-opacity-0">
-                            <button type="button" class="btn rounded-0 text-white profile nav-btn">
-                                <i class="fa-solid fa-user" style="color: #ffffff;"></i> Profile
-                            </button>
-                        </a>
-                        <a href="{{ url('/logout') }}" class="link-light link-offset-2 link-underline-opacity-0">
-                            <button type="button" class="btn rounded-0 text-white login nav-btn">Logout</button>
-                        </a>
-                    @else
-                        <a href="{{ url('/login') }}" class="link-light link-offset-2 link-underline-opacity-0">
-                            <button type="button" class="btn rounded-0 text-white login nav-btn">Login</button>
-                        </a>
-                        <a href="{{ url('/signup') }}" class="link-light link-offset-2 link-underline-opacity-0">
-                            <button type="button" class="btn rounded-0 text-white sign nav-btn">Signup</button>
-                        </a>
-                    @endif --}}
-
                     @if (Auth::check())
                         <a href="{{ url('/profile') }}" class="link-light link-offset-2 link-underline-opacity-0">
                             <button type="button" class="btn rounded-0 text-white profile nav-btn">
@@ -212,32 +194,3 @@
 
 </html>
 
-
-{{-- @if (count($data) > 0)
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Country</th>
-                <th scope="col">Gender</th>
-                <th scope="col">Hobbies</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($data as $row)
-                <tr>
-                    <td>{{ $row->name }}</td>
-                    <td>{{ $row->country_name }}</td>
-                    <td>{{ $row->gender }}</td>
-                    <td>
-                        @foreach (json_decode($row->hobbies) as $hobby)
-                            {{ $hobby }},
-                        @endforeach
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-@else
-    <p>No result found</p>
-@endif --}}

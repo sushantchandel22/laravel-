@@ -11,8 +11,8 @@ class AdminController extends Controller
 {
     public function admin(Request $request)
     {
-        $roles = Role::all();
-        $users = User::with([
+        $roles ['roles'] = Role::all();
+        $users['users'] = User::with([
             'role' => function ($query){
                 $query->with([
                     'permissions' => function ($query) {
@@ -21,7 +21,7 @@ class AdminController extends Controller
                 ]);
             }
         ])->where('role_id', '!=', true)->get();
-        return view('admin.admintable', compact('users', 'roles'));
+        return view('admin.admintable', $users , $roles);
     }
 
     public function toggleStatus(Request $request)

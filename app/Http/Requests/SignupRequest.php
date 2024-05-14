@@ -22,7 +22,7 @@ class SignupRequest extends FormRequest
     public function rules(): array
     {
         return
-            $validationRules = [
+            [
                 "firstname" => "required|regex:/^[a-zA-Z\s]+$/",
                 "lastname" => "required|alpha",
                 "email" => "required|email|unique:users",
@@ -31,17 +31,9 @@ class SignupRequest extends FormRequest
                 "gender" => "required",
                 "hobbies" => "required",
             ];
-            
-            // foreach($validationRules as $field => $rules)
-            // {
-            //     $validator= Validator::make($request->all(), [$field=>$rules]);
-            //     if($validator->fails())
-            //     {
-            //         $error= $validator->errors()->first($field);
-            //         return back()->withErrors([$field=>$error])->withInput(); 
-            //     }
-            // }
-      
-            
     }
-} 
+    public function withValidator($validator)
+    {
+        $validator->stopOnFirstFailure();
+    }
+}

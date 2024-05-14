@@ -13,8 +13,8 @@ class GalleriesController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $galleries = Gallery::where('user_id', $user->id)->get();
-        return view("pages/viewgallery", compact('galleries'));
+        $galleries ['galleries'] = Gallery::where('user_id', $user->id)->get();
+        return view("pages/viewgallery", $galleries);
     }
 
     /**
@@ -75,9 +75,9 @@ class GalleriesController extends Controller
     {
         $gallery = Gallery::find($gallery_id);
         if (!$gallery) {
-            return response()->json(['error' => 'Gallery not found'], 404);
+            return response('Gallery not found', 404);
         }
         $gallery->delete();
-        return response()->json(['message' => 'Gallery deleted successfully'], 200);
+        return response('Gallery deleted successfully', 200);
     }
 }

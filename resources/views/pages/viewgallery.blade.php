@@ -3,7 +3,7 @@
     <x-hero-component></x-hero-component>
     <div class="container-fluid mt-5">
 
-        <a href = "{{ url('/viewform') }}" class="link-light link-offset-2 link-underline-opacity-0">
+        <a href = "{{ url('/add-gallery') }}" class="link-light link-offset-2 link-underline-opacity-0">
             <button type="button"
                 class=" addgallerybutton float-end btn btn-primary border-0 fw-semibold rounded-0 btn-box">Add
                 gallery</button>
